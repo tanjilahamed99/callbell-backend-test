@@ -60,7 +60,7 @@ const userSchema = new mongoose.Schema({
       },
       planId: { type: String },
       plan: { type: String, default: "free" },
-      ration: { type: Number, default: 0 },
+      duration: { type: Number, default: 0 },
       planMinute: { type: Number, default: 0 },
     },
   ],
@@ -73,6 +73,7 @@ const userSchema = new mongoose.Schema({
       type: Number,
       default: 0,
     },
+    freeTrail: { type: Boolean, default: false },
   },
   createdAt: { type: Date, default: Date.now }, // Optional: add timestamp
   distributorStatus: {

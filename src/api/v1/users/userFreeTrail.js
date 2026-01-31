@@ -1,31 +1,41 @@
 const User = require("../../../models/User");
+const Website = require("../../../models/WebsiteInfo");
 
-const addCredit = async (req, res, next) => {
+const userFreeTrail = async (req, res, next) => {
   try {
-    const { userId, userEmail } = req.params;
-    const { duration, minute: minutes, subscriptionType } = req.body.data;
-
-    if (!userId || !userEmail) {
-      return res.status(400).json({
-        success: false,
-        message: "User ID and Email required",
-      });
-    }
-
-    if (!duration || !minutes || !subscriptionType) {
-      return res.status(400).json({
-        success: false,
-        message: "Duration, minutes, and subscription type required",
-      });
-    }
+    const { id } = req.params;
+    const { planId } = req.body;
 
     // Find the user
-    const findUser = await User.findById(userId);
-
+    const findUser = await User.findById(id);
     if (!findUser) {
       return res.status(404).json({
         success: false,
         message: "User not found",
+      });
+    }
+
+    //   id user get already the free then send a error
+    if (findUser.subscription.freeTrail) {
+      return res.status(301).json({
+        message: "Already used the free trail",
+        success: false,
+      });
+    }
+
+    //   check free trail
+    const webData = await Website.findOne();
+    const freeSub = webData.plan.find((i) => i._id.toString() === planId);
+    if (!freeSub) {
+      return res.status(404).json({
+        success: false,
+        message: "free trail not found",
+      });
+    }
+
+    if (freeSub.price > 0) {
+      return res.status(401).json({
+        message: "This subscription has" + freeSub.price + " price",
       });
     }
 
@@ -46,25 +56,28 @@ const addCredit = async (req, res, next) => {
     ) {
       // Add new duration to existing end date
       newEndDate = new Date(existingEndDate);
-      newEndDate.setDate(existingEndDate.getDate() + parseInt(duration));
+      newEndDate.setDate(
+        existingEndDate.getDate() + parseInt(freeSub.duration),
+      );
     } else {
       // Start fresh from today
       newEndDate = new Date();
-      newEndDate.setDate(newEndDate.getDate() + parseInt(duration));
+      newEndDate.setDate(newEndDate.getDate() + parseInt(freeSub.duration));
     }
 
     // Build subscription object
     let subscription = {
-      plan: subscriptionType,
+      plan: freeSub.name,
       status: "active",
       startDate: existingSubscription.startDate || currentDate,
       endDate: newEndDate,
-      minute: existingMinutes + parseInt(minutes),
+      minute: existingMinutes + parseInt(freeSub.minute),
+      freeTrail: true,
     };
 
     // Create transaction history
     const newTransaction = {
-      paymentMethod: "Admin Credit",
+      paymentMethod: "Free Trail",
       status: "Completed",
       author: {
         name: findUser.name,
@@ -72,10 +85,10 @@ const addCredit = async (req, res, next) => {
         id: findUser.id,
         address: findUser.address || "",
       },
-      plan: subscriptionType,
-      planMinute: minutes,
+      plan: freeSub.name,
+      planMinute: freeSub.minute,
       createdAt: new Date(),
-      duration,
+      duration: freeSub.duration,
     };
 
     // Update user
@@ -88,23 +101,19 @@ const addCredit = async (req, res, next) => {
       },
     };
 
-    const updatedUser = await User.findByIdAndUpdate(userId, update, {
+    const updatedUser = await User.findByIdAndUpdate(id, update, {
       new: true,
     });
 
     return res.status(200).json({
       success: true,
-      message: "Credits given successfully",
+      message: "Free trail added",
       user: updatedUser,
     });
   } catch (error) {
-    console.error("Error giving credits:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Server error",
-      error: error.message,
-    });
+    console.error(error);
+    next(error);
   }
 };
 
-module.exports = addCredit;
+module.exports = userFreeTrail;

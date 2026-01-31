@@ -6,6 +6,7 @@ const getWebsiteData = require("../../api/v1/users/getWebsiteData");
 const updateUserData = require("../../api/v1/users/updateUserData");
 const saveFcmToken = require("../../api/v1/users/saveFcmToken");
 const { protect } = require("../../middlewares/userValidate");
+const userFreeTrail = require("../../api/v1/users/userFreeTrail");
 
 const router = require("express").Router();
 
@@ -17,4 +18,5 @@ router.post("/contact", createContact);
 router.get("/liveKit", getLiveKitData);
 router.post("/save-fcm-token", saveFcmToken);
 
+router.put('/subscription/freeTrail/:id', protect, userFreeTrail)
 module.exports = router;
