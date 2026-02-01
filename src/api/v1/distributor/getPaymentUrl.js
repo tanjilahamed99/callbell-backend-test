@@ -50,7 +50,7 @@ const getPaymentUrl = async (req, res, next) => {
         customer_mobile: "4355435545",
         customer_name: user.name,
         customer_email: user.email,
-        redirect_URL: `${process.env.FRONTEND_URL}/dashboard/success?refId=${receiptId}&subId=${subId}&userId=${userId}&distributorId=${distributorId}`,
+        redirect_URL: `${process.env.FRONTEND_URL}/distributor/success?refId=${receiptId}&subId=${subId}&userId=${userId}&distributorId=${distributorId}`,
         failed_URL: `${process.env.FRONTEND_URL}/distributor/failed`,
       },
       {
