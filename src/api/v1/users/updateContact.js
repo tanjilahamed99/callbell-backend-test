@@ -1,6 +1,6 @@
 const User = require("../../../models/User");
 
-const updateUserContactData = async (req, res, next) => {
+const updateUserContactData = async (req, res) => {
   try {
     const { userId } = req.params;
     const newCallEntry = req.body;
@@ -8,8 +8,6 @@ const updateUserContactData = async (req, res, next) => {
     if (!userId || !newCallEntry) {
       return res.status(400).json({ error: "Invalid input" });
     }
-
-    console.log(newCallEntry);
 
     // $push ADDS to the array, keeps all previous data
     const result = await User.findByIdAndUpdate(
