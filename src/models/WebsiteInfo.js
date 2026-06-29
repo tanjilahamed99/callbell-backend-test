@@ -7,7 +7,7 @@ const WebsiteSchema = new mongoose.Schema({
   termsAndCondition: {},
   paymentMethod: {
     paygic: { type: Boolean, default: true },
-    razorPay: { type: Boolean, default: true },
+    razorpay: { type: Boolean, default: true },
   },
   plan: [
     {

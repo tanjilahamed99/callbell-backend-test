@@ -25,6 +25,11 @@ router.post("/website/add/:id/:email", adminOnly, addWebsiteData);
 router.get("/paygic/:id/:email", adminOnly, getPaygic);
 router.put("/paygic/set/:id/:email", adminOnly, setPaygic);
 
+// razorpay
+router.get("/paygic/:id/:email", adminOnly, getPaygic);
+router.put("/paygic/set/:id/:email", adminOnly, setPaygic);
+
+
 // contact
 router.get("/contacts/:id/:email", adminOnly, getAllContacts);
 

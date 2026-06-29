@@ -3,12 +3,22 @@ const router = require("express").Router();
 const crypto = require("crypto");
 const Website = require("../../models/WebsiteInfo");
 const User = require("../../models/User");
+const Razorpay = require("../../models/Razorpay");
 
 router.post("/create-intent", async (req, res) => {
   try {
+    const credentials = await Razorpay.findOne();
+
+    if (!credentials) {
+      return res.send({
+        message: "Credentials not found",
+        success: false,
+      });
+    }
+
     const razorpay = new Razorpays({
-      key_id: process.env.RAZORPAY_KEY_ID,
-      key_secret: process.env.RAZORPAY_SECRET,
+      key_id: credentials.key,
+      key_secret: credentials.secret,
     });
 
     const options = req.body;
@@ -36,9 +46,16 @@ router.post("/validate-payment", async (req, res) => {
   } = req.body;
   const planData = await Website.findOne();
 
-  console.log(req.body);
+  const credentials = await Razorpay.findOne();
 
-  const sha = crypto.createHmac("sha256", process.env.RAZORPAY_SECRET);
+  if (!credentials) {
+    return res.send({
+      message: "Credentials not found",
+      success: false,
+    });
+  }
+
+  const sha = crypto.createHmac("sha256", credentials.secret);
   //order_id + "|" + razorpay_payment_id
   sha.update(`${razorpay_order_id}|${razorpay_payment_id}`);
   const digest = sha.digest("hex");
@@ -157,6 +174,22 @@ router.post("/validate-payment", async (req, res) => {
     orderId: razorpay_order_id,
     paymentId: razorpay_payment_id,
     success: true,
+  });
+});
+
+router.get("/key", async (req, res) => {
+  const credentials = await Razorpay.findOne();
+
+  if (!credentials) {
+    return res.send({
+      message: "Credentials not found",
+      success: false,
+    });
+  }
+
+  res.send({
+    success: true,
+    key: credentials.key,
   });
 });
 

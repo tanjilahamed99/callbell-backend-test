@@ -4,6 +4,8 @@ const addWebsiteData = async (req, res, next) => {
   try {
     const updatedData = req.body;
 
+    console.log(req.body);
+
     let settings = await Website.findOne();
     if (!settings) {
       // If no document exists yet, create it
